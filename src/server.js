@@ -3,6 +3,10 @@ const routes = require('./routes')
 const mongoose = require('mongoose')
 const cors = require('cors')
 
+const routes = require('./routes');
+
+
+
 const server = express();
 mongoose.connect('mongodb+srv://app01:app01@cluster0-d1swx.mongodb.net/test?retryWrites=true&w=majority', { useNewUrlParser: true });
 
