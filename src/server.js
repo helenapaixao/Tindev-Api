@@ -1,19 +1,35 @@
-const express = require('express')
-const routes = require('./routes')
-const mongoose = require('mongoose')
-const cors = require('cors')
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 
 const routes = require('./routes');
 
+const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 
+const connectedUsers = {};
 
-const server = express();
-mongoose.connect('mongodb+srv://app01:app01@cluster0-d1swx.mongodb.net/test?retryWrites=true&w=majority', { useNewUrlParser: true });
+io.on('connection', socket => {
+  const { user } = socket.handshake.query;
 
+  connectedUsers[user] = socket.id;
+});
 
-server.use(cors())
-server.use(express.json())
-server.use(routes)
+mongoose.connect('mongodb+srv://tindevapi:tindev@cluster0-klspd.mongodb.net/test?retryWrites=true&w=majority', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
+app.use((req, res, next) => {
+  req.io = io;
+  req.connectedUsers = connectedUsers;
 
-server.listen(3333)
+  return next();
+});
+
+app.use(cors());
+app.use(express.json());
+app.use(routes);
+
+server.listen(3333);
